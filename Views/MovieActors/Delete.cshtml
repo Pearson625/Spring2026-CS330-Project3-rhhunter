@@ -1,0 +1,35 @@
+﻿@model Spring2026_CS330_Project3_rhhunter.Models.MovieActor
+
+@{
+    ViewData["Title"] = "Delete Cast Relationship";
+}
+
+<div class="page-header">
+    <h1>Delete Cast Relationship</h1>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</div>
+
+<div class="form-wrapper mx-auto">
+    <p class="text-center mb-4" style="color: var(--accent);">Are you sure you want to delete this relationship?</p>
+
+    <div class="row mb-2">
+        <div class="col-sm-4" style="color: var(--accent);">Movie</div>
+        <div class="col-sm-8">@Model.Movie.Title</div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-sm-4" style="color: var(--accent);">Actor</div>
+        <div class="col-sm-8">@Model.Actor.Name</div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <div class="row g-2">
+            <div class="col">
+                <input type="submit" value="Delete" class="btn btn-danger w-100" />
+            </div>
+            <div class="col">
+                <a asp-action="Index" class="btn btn-secondary w-100">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

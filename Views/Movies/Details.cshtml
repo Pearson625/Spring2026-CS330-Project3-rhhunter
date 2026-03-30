@@ -1,0 +1,88 @@
+﻿@model Spring2026_CS330_Project3_rhhunter.Models.ViewModels.MovieDetailsViewModel
+
+@{
+    ViewData["Title"] = "Movie Details";
+}
+
+<div class="page-header">
+    <h1>@Model.Movie.Title</h1>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Movie.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<div class="table-wrapper p-4 mb-4">
+    <div class="row align-items-center">
+
+        <div class="col-md-3 text-center mb-3 mb-md-0">
+            @if (Model.Movie.Poster != null)
+            {
+                var base64 = Convert.ToBase64String(Model.Movie.Poster);
+                var imgSrc = $"data:image/jpg;base64,{base64}";
+                <img src="@imgSrc" class="poster" />
+            }
+        </div>
+
+        <!-- Actor Info -->
+        <div class="col-md-9">
+            <div class="row mb-2">
+                <div class="col-sm-4 text-muted">Title</div>
+                <div class="col-sm-8">@Model.Movie.Title</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-sm-4 text-muted">Genre</div>
+                <div class="col-sm-8">@Model.Movie.Genre</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-sm-4 text-muted">Release Year</div>
+                <div class="col-sm-8">@Model.Movie.ReleaseYear</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-sm-4 text-muted">IMDb</div>
+                <div class="col-sm-8">
+                    <a href="@Model.Movie.IMDB" target="_blank">
+                        View Movie Page
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<h2 class="mb-3">Actors</h2>
+
+<div class="table-wrapper">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Actors.Any())
+            {
+                @foreach (var item in Model.Actors)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>
+                            <a asp-controller="Actors" asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">View</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2" class="text-muted">No movies found for this actor.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

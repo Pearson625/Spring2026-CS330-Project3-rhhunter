@@ -2,7 +2,9 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero">
+    <h1>Mini<span>IMDb</span></h1>
+    <p>Browse movies, explore actors, and read AI-powered sentiment analysis.</p>
+    <a asp-controller="Movies" asp-action="Index" class="btn btn-primary">Browse Movies</a>
+    <a asp-controller="Actors" asp-action="Index" class="btn btn-secondary ms-2">View Actors</a>
 </div>

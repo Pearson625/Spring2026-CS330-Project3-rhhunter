@@ -1,0 +1,50 @@
+﻿@model Spring2026_CS330_Project3_rhhunter.Models.Movie
+
+@{
+    ViewData["Title"] = "Add Movie";
+}
+
+<div class="page-header">
+    <h1>Add Movie</h1>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</div>
+
+<div class="form-wrapper mx-auto">
+    <form asp-action="Create" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div class="form-group">
+            <label asp-for="Title" class="control-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="IMDB" class="control-label">IMDb</label>
+            <input asp-for="IMDB" class="form-control" />
+            <span asp-validation-for="IMDB" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Genre" class="control-label"></label>
+            <input asp-for="Genre" class="form-control" />
+            <span asp-validation-for="Genre" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ReleaseYear" class="control-label">Release Year</label>
+            <input asp-for="ReleaseYear" class="form-control" />
+            <span asp-validation-for="ReleaseYear" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Poster" class="control-label"></label>
+            <input type="file" name="Poster" class="form-control" />
+            <span asp-validation-for="Poster" class="text-danger"></span>
+        </div>
+        <div class="form-group mt-3">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

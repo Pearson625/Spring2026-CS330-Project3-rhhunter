@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Spring2026_CS330_Project3_rhhunter.Models.Movie>
+
+@{
+    ViewData["Title"] = "Movies";
+}
+
+<div class="page-header">
+    <h1>Movies</h1>
+    <a asp-action="Create" class="btn btn-primary">Add Movie</a>
+</div>
+
+<div class="table-wrapper">
+    <table class="table" id="moviesTable">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Title)</th>
+                <th>@Html.DisplayNameFor(model => model.Genre)</th>
+                <th>Release Year</th>
+                <th>IMDb</th>
+                <th>Poster</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>@Html.DisplayFor(modelItem => item.Genre)</td>
+                <td>@Html.DisplayFor(modelItem => item.ReleaseYear)</td>
+                <td><a href="@item.IMDB" target="_blank"> @item.Title's IMDb</a></td>
+                <td>
+                    @if (item.Poster != null)
+                    {
+                        var base64 = Convert.ToBase64String(item.Poster);
+                        var imgSrc = $"data:image/jpg;base64,{base64}";
+                        <img src="@imgSrc" class="poster" />
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id" >Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
