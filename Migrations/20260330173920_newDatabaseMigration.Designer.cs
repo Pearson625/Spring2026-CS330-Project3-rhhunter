@@ -9,11 +9,11 @@ using Spring2026_CS330_Project3_rhhunter.Data;
 
 #nullable disable
 
-namespace Spring2026_CS330_Project3_rhhunter.Data.Migrations
+namespace Spring2026_CS330_Project3_rhhunter.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260327175154_AddMovies")]
-    partial class AddMovies
+    [Migration("20260330173920_newDatabaseMigration")]
+    partial class newDatabaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -227,6 +227,37 @@ namespace Spring2026_CS330_Project3_rhhunter.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Spring2026_CS330_Project3_rhhunter.Models.Actor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IMDB")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Photo")
+                        .HasColumnType("varbinary(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Actor");
+                });
+
             modelBuilder.Entity("Spring2026_CS330_Project3_rhhunter.Models.Movie", b =>
                 {
                     b.Property<int>("Id")
@@ -256,6 +287,29 @@ namespace Spring2026_CS330_Project3_rhhunter.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Movie");
+                });
+
+            modelBuilder.Entity("Spring2026_CS330_Project3_rhhunter.Models.MovieActor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("MovieId");
+
+                    b.ToTable("MovieActor");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -307,6 +361,25 @@ namespace Spring2026_CS330_Project3_rhhunter.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Spring2026_CS330_Project3_rhhunter.Models.MovieActor", b =>
+                {
+                    b.HasOne("Spring2026_CS330_Project3_rhhunter.Models.Actor", "Actor")
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Spring2026_CS330_Project3_rhhunter.Models.Movie", "Movie")
+                        .WithMany()
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Actor");
+
+                    b.Navigation("Movie");
                 });
 #pragma warning restore 612, 618
         }
