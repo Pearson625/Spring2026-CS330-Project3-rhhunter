@@ -142,7 +142,7 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 50%;
 }
 
-/* ── Buttons ───────────────────────────────── */
+/* Buttons */
 .btn-primary {
     background-color: var(--accent);
     border-color: var(--accent);
@@ -178,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
         color: #fff;
     }
 
-/* ── Forms ─────────────────────────────────── */
+/* Forms */
 .form-wrapper {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -220,7 +220,7 @@ label, .control-label {
     font-size: 0.8rem;
 }
 
-/* ── Footer ────────────────────────────────── */
+/* Footer */
 footer {
     background: var(--bg-card);
     border-top: 1px solid var(--border);

@@ -1,24 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 using Spring2026_CS330_Project3_rhhunter.Data;
 using Spring2026_CS330_Project3_rhhunter.Models;
 using Spring2026_CS330_Project3_rhhunter.Models.ViewModels;
 using System;
+using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using VaderSharp2;
+using Azure.AI.OpenAI;
 
 namespace Spring2026_CS330_Project3_rhhunter.Controllers
 {
     public class MoviesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public MoviesController(ApplicationDbContext context)
+        public MoviesController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Poster(int? id)
@@ -36,6 +42,44 @@ namespace Spring2026_CS330_Project3_rhhunter.Controllers
             return File(movie.Poster, "image/jpg");
         }
 
+        private async Task<List<ReviewContainer>> GetReviewsAsync(string movieTitle)
+        {
+            var endpoint = new Uri(_configuration["OpenAI:Endpoint"]);
+            var apiKey = new ApiKeyCredential(_configuration["OpenAI:ApiKey"]);
+            var deployment = _configuration["OpenAI:Deployment"];
+
+            ChatClient client = new AzureOpenAIClient(endpoint, apiKey).GetChatClient(deployment);
+
+            string[] personas = { "is harsh", "loves romance", "loves comedy", "loves thrillers", "loves fantasy" };
+
+            var messages = new ChatMessage[]
+            {
+            new SystemChatMessage(
+                $"You represent a group of {personas.Length} film critics with the following personalities: " +
+                $"{string.Join(", ", personas)}. When you receive a question, respond as each member " +
+                $"with each response separated by a '|', but don't indicate which member you are."),
+            new UserChatMessage(
+                $"How would you rate the movie '{movieTitle}' out of 10 in 150 words or less?")
+            };
+
+            ClientResult<ChatCompletion> result = await client.CompleteChatAsync(messages);
+
+            string[] reviewTexts = result.Value.Content[0].Text
+                .Split('|')
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Take(5)
+                .ToArray();
+
+            var analyzer = new SentimentIntensityAnalyzer();
+
+            return reviewTexts.Select(review => new ReviewContainer
+            {
+                Review = review,
+                Score = analyzer.PolarityScores(review).Compound
+            }).ToList();
+        }
+
         // GET: Movies
         public async Task<IActionResult> Index()
         {
@@ -45,33 +89,30 @@ namespace Spring2026_CS330_Project3_rhhunter.Controllers
         // GET: Movies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var movie = await _context.Movie
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (movie == null)
-            {
-                return NotFound();
-            }
+            var movie = await _context.Movie.FirstOrDefaultAsync(m => m.Id == id);
+            if (movie == null)return NotFound();
 
 
-            var Actors = await _context.MovieActor
+            var actors = await _context.MovieActor
                 .Include(m => m.Actor)
                 .Where(m => m.MovieId == id)
                 .Select(m => m.Actor!)
                 .ToListAsync();
 
-            var vm = new MovieDetailsViewModel()
+            var reviews = await GetReviewsAsync(movie.Title);
+
+            var viewModel = new MovieDetailsViewModel()
             {
                 Movie = movie,
-                Actors = Actors
+                Actors = actors,
+                Reviews = reviews,
+                AverageSentiment = reviews.Average(r => r.Score)
             };
 
 
-            return View(vm);
+            return View(viewModel);
         }
 
         // GET: Movies/Create

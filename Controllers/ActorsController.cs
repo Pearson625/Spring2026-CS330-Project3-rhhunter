@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Azure.AI.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 using Spring2026_CS330_Project3_rhhunter.Data;
 using Spring2026_CS330_Project3_rhhunter.Models;
 using Spring2026_CS330_Project3_rhhunter.Models.ViewModels;
+using System;
+using System.ClientModel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using VaderSharp2;
 
 
 namespace Spring2026_CS330_Project3_rhhunter.Controllers
@@ -15,10 +19,12 @@ namespace Spring2026_CS330_Project3_rhhunter.Controllers
     public class ActorsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public ActorsController(ApplicationDbContext context)
+        public ActorsController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
         public async Task<IActionResult> Photo(int? id)
         {
@@ -35,6 +41,44 @@ namespace Spring2026_CS330_Project3_rhhunter.Controllers
             return File(actor.Photo, "image/jpg");
         }
 
+        private async Task<List<TweetContainer>> GetTweetsAsync(string actorName)
+        {
+            var endpoint = new Uri(_configuration["OpenAI:Endpoint"]);
+            var apiKey = new ApiKeyCredential(_configuration["OpenAI:ApiKey"]);
+            var deployment = _configuration["OpenAI:Deployment"];
+
+            ChatClient client = new AzureOpenAIClient(endpoint, apiKey)
+                .GetChatClient(deployment);
+
+            var messages = new ChatMessage[]
+            {
+            new SystemChatMessage(
+                "You represent the Twitter social media platform. " +
+                "Generate tweets from a variety of users with different opinions. " +
+                "Separate each tweet with a '|' and do not include usernames, " +
+                "numbers, or any extra text — only the tweet content."),
+            new UserChatMessage(
+                $"Generate exactly 10 tweets from different users about the actor {actorName}.")
+            };
+
+            ClientResult<ChatCompletion> result = await client.CompleteChatAsync(messages);
+
+            string[] tweetTexts = result.Value.Content[0].Text
+                .Split('|')
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Take(10)
+                .ToArray();
+
+            var analyzer = new SentimentIntensityAnalyzer();
+
+            return tweetTexts.Select(tweet => new TweetContainer
+            {
+                Tweet = tweet,
+                Score = analyzer.PolarityScores(tweet).Compound
+            }).ToList();
+        }
+
         // GET: Actors
         public async Task<IActionResult> Index()
         {
@@ -44,17 +88,10 @@ namespace Spring2026_CS330_Project3_rhhunter.Controllers
         // GET: Actors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var actor = await _context.Actor
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (actor == null)
-            {
-                return NotFound();
-            }
+            var actor = await _context.Actor.FirstOrDefaultAsync(m => m.Id == id);
+            if (actor == null) return NotFound();
 
             var movies = await _context.MovieActor
                 .Include(m => m.Movie)
@@ -62,13 +99,17 @@ namespace Spring2026_CS330_Project3_rhhunter.Controllers
                 .Select(m => m.Movie!)
                 .ToListAsync();
 
-            var vm = new ActorDetailsViewModel()
+            var tweets = await GetTweetsAsync(actor.Name);
+
+            var viewModel = new ActorDetailsViewModel()
             {
                 Actor = actor,
-                Movies = movies
+                Movies = movies,
+                Tweets = tweets,
+                AverageSentiment = tweets.Average(t => t.Score)
             };
 
-            return View(vm);
+            return View(viewModel);
         }
 
         // GET: Actors/Create

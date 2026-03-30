@@ -24,7 +24,6 @@
             }
         </div>
 
-        <!-- Actor Info -->
         <div class="col-md-9">
             <div class="row mb-2">
                 <div class="col-sm-4 text-muted">Name</div>
@@ -86,3 +85,31 @@
     </table>
 </div>
 
+<div class="page-header mt-4">
+    <h2>AI Sentiment Analysis</h2>
+    <span class="@Model.AverageSentimentClass">
+        Overall Sentiment: @Model.AverageSentimentLabel (@Model.AverageSentiment.ToString("F2"))
+    </span>
+</div>
+
+<div class="table-wrapper">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Tweet</th>
+                <th style="width: 180px;">Sentiment</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tweet in Model.Tweets)
+            {
+                <tr>
+                    <td>@tweet.Tweet</td>
+                    <td class="@tweet.LabelClass">
+                        @tweet.Label (@tweet.Score.ToString("F2"))
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
